@@ -43,7 +43,7 @@ double likelihood(double s, double ancient_frq, double modern_frq) {
 	double N0 = 13393.34;
 	for(int i = 1; i <= generations; ++i) {
 		N.push_back(std::floor(N0));
-		N0 *= 1;
+		N0 *= 1.02;
 	}
 	std::vector<double> prior;
 	prior.push_back(0);
@@ -76,6 +76,7 @@ double likelihood(double s, double ancient_frq, double modern_frq) {
 
 
 int main(int argc, char* argv[]) {
+	//Take in input file from command line
 	std::string filename = argv[1];
 	std::ifstream file(filename);
 	std::string line;
@@ -83,6 +84,7 @@ int main(int argc, char* argv[]) {
 	std::getline(file, line);
 	boost::math::chi_squared mydist(1);
 	while(std::getline(file, line)) {
+		//Parse the tsv
 		boost::split(strs, line, boost::is_any_of("\t "));
 		std::cerr << strs[0] << std::endl;
 		double modern_frq = std::stod(strs[9]);
@@ -92,6 +94,8 @@ int main(int argc, char* argv[]) {
 		double s = 0.01;
 		double old_l = 0.0;
 		do {
+			//calculate likelihood for updated s until likelihood
+			//does not increase
 			old_l = max_l;
 			auto l = likelihood(s, ancient_frq, modern_frq);
 			if ( l > max_l ) {
@@ -103,6 +107,7 @@ int main(int argc, char* argv[]) {
 		} while( old_l < max_l );
 		auto H0 = likelihood(0, ancient_frq, modern_frq);
 		double test = 0;
+		//calculate p value from LRT
 		if( H0 < max_l ) {
 			test = 2*(log(max_l)-log(H0));
 		}
