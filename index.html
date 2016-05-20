@@ -22,9 +22,9 @@
 	Given that the modern CEU population can be modeled as a linear combination of 19.6% HG, 25.7% EF, 54.7% SA populations, for each allele I calculated the frequencies of these combined ancient Eurasian populations, and similarly calculated a time point that is, in the same proportions, a linear combination of the dates the samples are said to be from, which was 3715.7 years ago or ~155 generations. So with the modern and ancient allele frequencies  I construct a hidden markov model to calculated the selection coefficient most likely to produce the shift in allele frequencies conditional on a super-exponential population grown model [4]. 
 	</p>
 	<p>
-	Hidden markov models leverage what are called markov chains, which are random processes that transition from one state to the next bases only on the current state. In this case, the probability that an allele in the population at frequency x at one generation will be at frequency y in the next generation is modeled as binomial sampling with the probability of success equal to x times the coefficient of selection, and the number of trials equal to N(t) at t1. In this way an allele's progression over time may be modeled as a markcov chain. This isn't the whole story, however, because the samples available are not the true frequencies that exist , the true frequencies are “hidden”, so this uncertainty is represented as an additional binomial sampling step where the probability of success is equal to the a guess at the true allele frequency. The following code illustrates the method implemented in C++.
+	Hidden markov models leverage what are called markov chains, which are random processes that transition from one state to the next bases only on the current state. In this case, the probability that an allele in the population at frequency x at one generation will be at frequency y in the next generation is modeled as binomial sampling with the probability of success equal to x times the coefficient of selection, and the number of trials equal to N(t) at t1. In this way an allele's progression over time may be modeled as a markcov chain, and is the foundation of the delta approximation[5] which is used to estimate these transition probabilities. This isn't the whole story, however, because the samples available are not the true frequencies that exist , the true frequencies are “hidden”, so this uncertainty is represented as an additional binomial sampling step where the probability of success is equal to the a guess at the true allele frequency. The following code illustrates the method implemented in C++.
 	</p>
-	<script src="http://d1h8qm6whtl6z3.cloudfront.net/wp-content/uploads/2013/03/A03b_2_State_Markov_Chain.jpg"></script>
+	<script src="http://www.genetics.org/sites/default/files/highwire/genetics/198/3/1237/embed/mml-math-3.gif"></script>
 	<script src="https://gist.github.com/NathanCompBioakes/7cce0e23a060773c56410ac22b8f1803.js"></script>
 
 <h3>Results</h3>
@@ -46,6 +46,9 @@
 </p>
 <p>
     [4] Inference of Super-exponential Human Population Growth via Efficient Computation of the Site Frequency Spectrum for Generalized Models. Genetics. (Jan 201
+</p>
+<p>
+    [5] Lacerda, et al. Population Genetics Inference for Longitudinally-Sampled Mutants Under Strong Selection. Genetics (Sept 10, 2014)
 </p>
 </div>
 </article>
