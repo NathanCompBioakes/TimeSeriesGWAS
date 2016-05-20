@@ -8,24 +8,7 @@
 #include <thread>
 #include <fstream>
 
-struct params {
-	double mu;
-	double sd;
-	double s;
-	params ( double i, int N, double s ) : mu(1.0*i/N), sd(1.0*i/N*(1-1.0*i/N)+0.1), s(s) {};
-	void operator() (int i) {
-		auto old_mu = mu;
-		mu = (1+s)*mu/(1+s*mu);
-		sd = (1.0/i)*(mu*(1-mu)) + pow((1+s)/(1+s*old_mu),2)*sd;
-	}
-};
-
 boost::math::normal_distribution<> delta_approximation(unsigned i,const std::vector<int>& N, double s) {
-	/*params param(i, N[0], s);
-	for_each(N.begin(), N.end(), param);
-	if( i == 1000) {
-		std::cerr << i << " " << param.mu << " " << param.sd << std::endl;
-	}*/
 	double mu = 1.0*i/N[0];
 	double sd = sqrt((1.0*i/N[0])*(1-1.0*i/N[0]))/N[0];
 	for(auto n : N) {
@@ -34,7 +17,6 @@ boost::math::normal_distribution<> delta_approximation(unsigned i,const std::vec
 		sd = (1.0/n)*(mu*(1-mu)) + pow((1+s)/(1+s*old_mu),2)*sd;
 	}
 	boost::math::normal_distribution<> normal(mu,sd);
-	//boost::math::normal_distribution<> normal(param.mu,param.sd);
 	return normal;
 }
 
@@ -48,10 +30,8 @@ void calc_l(double* l,const std::vector<int>& N, unsigned i, double s,const std:
 	unsigned n1 = 184;
 	unsigned n2 = 183;
 	for(unsigned j=1; j<std::floor(N.back()); ++j) {
-		//*l = prior[i]*boost::math::pdf(transition,j*1.0/N[0])*boost::math::pdf(emission1, i*1.0/N[0])*boost::math::pdf(emission2, j*1.0/N.back());
 		auto emission1 = emission_gen(i*1.0/N[0], n1);
 		auto emission2 = emission_gen(j*1.0/N.back(), n2);
-		//std::cerr << boost::math::pdf(transition,j*1.0/N[0]) << " " << boost::math::pdf(emission1, 0.5*n1) << " " << boost::math::pdf(emission2, 0.721*n2) << std::endl;
 		*l += prior[i]*boost::math::pdf(transition,j*1.0/N.back())*boost::math::pdf(emission1, ancient_frq*n1)*boost::math::pdf(emission2, modern_frq*n2);
 	}
 }
@@ -73,7 +53,6 @@ double likelihood(double s, double ancient_frq, double modern_frq) {
 	double sum = std::accumulate(prior.begin(), prior.end(), 0.0);
 	std::transform( prior.begin(), prior.end(), prior.begin(), [sum]( double i ) { return i/sum; } );
 	unsigned int THREADS = std::thread::hardware_concurrency();
-	//unsigned int THREADS = 1;
 	std::vector<std::thread *> t;
 	std::vector<double*> part_sums;
 	for(unsigned i=1; i<static_cast<unsigned>(N[0]); i+=THREADS) {
@@ -110,13 +89,6 @@ int main(int argc, char* argv[]) {
 		double ancient_frq = std::stod(strs[6])*0.196 + std::stod(strs[7])*0.257 + std::stod(strs[6])*0.547;
 		double max_s = 0;
 		double max_l = 0;
-		/*for(double j = 0.001; j< 1; j+=0.001) {
-			auto l = likelihood(j, ancient_frq, modern_frq);
-			if ( l > max_l ) {
-				max_s = j;
-				max_l = l;
-			}
-		}*/
 		double s = 0.01;
 		double old_l = 0.0;
 		do {
