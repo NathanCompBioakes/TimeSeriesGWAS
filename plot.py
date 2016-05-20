@@ -13,6 +13,12 @@ def main(argv):
     plt.axhline(y=-log10(0.00000005), xmin=0, xmax=len(df), hold=None, color='r')
     plt.xlabel('Chromosome')
     plt.ylabel('-log10(p)')
+    plt.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom='off',      # ticks along the bottom edge are off
+        top='off',         # ticks along the top edge are off
+        labelbottom='off') # labels along the bottom edge are off
     plt.savefig('plot.png')
     #plt.show()
 
