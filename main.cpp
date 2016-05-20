@@ -26,6 +26,10 @@ boost::math::binomial_distribution<> emission_gen(double sample_f, unsigned samp
 }
 
 void calc_l(double* l,const std::vector<int>& N, unsigned i, double s,const std::vector<double>& prior, double ancient_frq, double modern_frq) {
+	//calculated the likelihood that an allele will be at frequency i/N(t) at t1 in
+	//the population, and at frequency j/N(t) at t2, that given those
+	//frequencies that you would sample the observed frequencies from them,
+	//all conditional on s being the selection coefficient.
 	auto transition = delta_approximation(i, N, s);
 	unsigned n1 = 184;
 	unsigned n2 = 183;
@@ -37,6 +41,9 @@ void calc_l(double* l,const std::vector<int>& N, unsigned i, double s,const std:
 }
 
 double likelihood(double s, double ancient_frq, double modern_frq) {
+	//Calculate the likelihood that a coefficient of s can result in a
+	//frequency change from ancient_frq to modern_frq in 155 generations
+	//given a super-exponential population growth
 	double l = 0;
 	int generations = 155;
 	std::vector<int> N;
@@ -50,8 +57,10 @@ double likelihood(double s, double ancient_frq, double modern_frq) {
 	for(int i = 1; i <= N[0]; ++i) {
 		prior.push_back(1.0/i);
 	}
+	//construct prior distribution from a neutral model
 	double sum = std::accumulate(prior.begin(), prior.end(), 0.0);
 	std::transform( prior.begin(), prior.end(), prior.begin(), [sum]( double i ) { return i/sum; } );
+	//concurrency boilerplate
 	unsigned int THREADS = std::thread::hardware_concurrency();
 	std::vector<std::thread *> t;
 	std::vector<double*> part_sums;
@@ -63,6 +72,7 @@ double likelihood(double s, double ancient_frq, double modern_frq) {
 			part_sums.push_back(new double(0));
 		}
 		for(unsigned j=1; j<max_j; ++j) {
+			//call calc_l in parallel
 			t.push_back(new std::thread(calc_l, part_sums[j], std::cref(N), j+i, s, std::cref(prior), ancient_frq, modern_frq));
 		}
 		for( auto& thread: t ) {
